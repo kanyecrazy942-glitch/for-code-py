@@ -1,0 +1,18 @@
+{
+  "name": "Text",
+  "path": "blocks/text",
+  "blocks": [
+    { "type": "text_literal" },
+    { "type": "text_multiline" },
+    { "type": "text_concat" },
+    { "type": "text_format" },
+    { "type": "text_length" },
+    { "type": "text_substring" },
+    { "type": "text_search" },
+    { "type": "text_transform" },
+    { "type": "text_split_join" },
+    { "type": "text_replace" },
+    { "type": "text_html_transform" },
+    { "type": "text_is_empty" }
+  ]
+}
