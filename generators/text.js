@@ -31,7 +31,7 @@ Python.forBlock['text_format'] = function(block) {
   const text = Python.valueToCode(block, 'TEXT', Python.ORDER_MEMBER) || '\'\'';
   const args = [];
   for (let i = 0; i < block.itemCount_; i++) {
-    args[i] = Python.valueToCode(block, 'ARG' + i, Python.ORDER_NONE) || 'None';
+    args[i] = Python.valueToCode(block, 'ADD' + i, Python.ORDER_NONE) || 'None';
   }
   const code = `${text}.format(${args.join(', ')})`;
   return [code, Python.ORDER_FUNCTION_CALL];

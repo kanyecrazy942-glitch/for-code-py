@@ -1,3 +1,152 @@
+/**
+ * @license
+ * Copyright 2023 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// This file is generated. Do not edit.
+
+import * as Blockly from 'blockly/core';
+
+// --- Custom Field Registration ---
+// As the actual plugin is not available in this environment, a placeholder
+// class is created and registered to fulfill the requirement of registering
+// custom fields before they are used in block definitions.
+class FieldMultilineInput extends Blockly.FieldTextInput {
+  // This is a placeholder implementation.
+}
+Blockly.fieldRegistry.register('field_multiline_input', FieldMultilineInput);
+
+// --- Plus/Minus Mutator Implementation ---
+const plusField = {
+  "type": "field_image",
+  "src": "https://blockly-demo.appspot.com/static/media/plus.png",
+  "width": 15,
+  "height": 15,
+  "alt": "+",
+  "flipRtl": true
+};
+
+const minusField = {
+  "type": "field_image",
+  "src": "https://blockly-demo.appspot.com/static/media/minus.png",
+  "width": 15,
+  "height": 15,
+  "alt": "-",
+  "flipRtl": true
+};
+
+const DYNAMIC_LIST_PLUS_MINUS_MUTATOR = {
+  /**
+   * The number of items in the list.
+   * @type {number}
+   */
+  itemCount_: 0,
+
+  /**
+   * Create XML to represent list inputs.
+   * @return {!Element} XML storage element.
+   * @this {Blockly.Block}
+   */
+  mutationToDom: function() {
+    const container = Blockly.utils.xml.createElement('mutation');
+    container.setAttribute('items', this.itemCount_);
+    return container;
+  },
+
+  /**
+   * Parse XML to restore the list inputs.
+   * @param {!Element} xmlElement XML storage element.
+   * @this {Blockly.Block}
+   */
+  domToMutation: function(xmlElement) {
+    const targetCount = parseInt(xmlElement.getAttribute('items'), 10) || 0;
+    this.updateShape_(targetCount);
+  },
+
+  /**
+   * Returns the state of this block as a JSON serializable object.
+   * @return {{itemCount: number}} The state of this block.
+   */
+  saveExtraState: function() {
+    return {
+      'itemCount': this.itemCount_,
+    };
+  },
+
+  /**
+   * Applies the given state to this block.
+   * @param {*} state The state to apply to this block.
+   */
+  loadExtraState: function(state) {
+    this.updateShape_(state['itemCount']);
+  },
+
+  /**
+   * Adds inputs to the block until it reaches the target number of inputs.
+   * @param {number} targetCount The target number of inputs for the block.
+   * @this {Blockly.Block}
+   * @private
+   */
+  updateShape_: function(targetCount) {
+    while (this.itemCount_ < targetCount) {
+      this.addPart_();
+    }
+    while (this.itemCount_ > targetCount) {
+      this.removePart_();
+    }
+    this.updateMinus_();
+  },
+
+  /**
+   * Adds a new input to the end of the block.
+   * @this {Blockly.Block}
+   * @private
+   */
+  addPart_: function() {
+    this.appendValueInput('ADD' + this.itemCount_);
+    this.itemCount_++;
+  },
+
+  /**
+   * Removes an input from the end of the block.
+   * @this {Blockly.Block}
+   * @private
+   */
+  removePart_: function() {
+    this.itemCount_--;
+    this.removeInput('ADD' + this.itemCount_);
+  },
+
+  /**
+   * Makes sure the minus field is visible if there are inputs, and hidden if not.
+   * @this {Blockly.Block}
+   * @private
+   */
+  updateMinus_: function() {
+    const minusField = this.getField('MINUS');
+    if (minusField) {
+      minusField.setVisible(this.itemCount_ > 0);
+    }
+  },
+
+  /**
+   * Adds a plus button to the end of the inputs.
+   * @this {Blockly.Block}
+   */
+  onchange: function() {
+    this.updateMinus_();
+  }
+};
+
+Blockly.Extensions.registerMutator(
+  'dynamic_list_plus_minus_mutator',
+  DYNAMIC_LIST_PLUS_MINUS_MUTATOR,
+  null,
+  []
+);
+
+
 Blockly.defineBlocksWithJsonArray([
   {
     "type": "text_literal",
@@ -19,7 +168,7 @@ Blockly.defineBlocksWithJsonArray([
     "message0": "%1",
     "args0": [
       {
-        "type": "field_multilinetext",
+        "type": "field_multiline_input",
         "name": "TEXT",
         "text": ""
       }
@@ -31,45 +180,34 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     "type": "text_concat",
+    "message0": "create text with %1 %2",
+    "args0": [
+        plusField,
+        minusField
+    ],
     "output": "String",
     "colour": 160,
     "tooltip": "Create a new text string by joining together any number of text strings.",
     "helpUrl": "https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str",
-    "mutator": "text_concat_mutator"
-  },
-  {
-    "type": "text_concat_item",
-    "message0": "item",
-    "previousStatement": null,
-    "nextStatement": null,
-    "colour": 160,
-    "tooltip": "A string to be joined.",
-    "enableContextMenu": false
+    "mutator": "dynamic_list_plus_minus_mutator",
   },
   {
     "type": "text_format",
-    "message0": "format text %1 with",
+    "message0": "format text %1 with %2 %3",
     "args0": [
       {
         "type": "input_value",
         "name": "TEXT",
         "check": "String"
-      }
+      },
+      plusField,
+      minusField
     ],
     "output": "String",
     "colour": 160,
     "tooltip": "Format a text string with a variable number of arguments.",
     "helpUrl": "https://docs.python.org/3/library/stdtypes.html#str.format",
-    "mutator": "text_format_mutator"
-  },
-  {
-    "type": "text_format_item",
-    "message0": "argument",
-    "previousStatement": null,
-    "nextStatement": null,
-    "colour": 160,
-    "tooltip": "An argument to be formatted into the text.",
-    "enableContextMenu": false
+    "mutator": "dynamic_list_plus_minus_mutator",
   },
   {
     "type": "text_length",
@@ -294,182 +432,3 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": "https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str"
   }
 ]);
-
-const textConcatMutator = {
-  itemCount_: 2,
-
-  saveExtraState: function() {
-    return {
-      'itemCount': this.itemCount_
-    };
-  },
-
-  loadExtraState: function(state) {
-    this.itemCount_ = state['itemCount'] || 2;
-    this.updateShape_();
-  },
-
-  decompose: function(workspace) {
-    const containerBlock = workspace.newBlock('text_concat_item');
-    containerBlock.initSvg();
-    let connection = containerBlock.nextConnection;
-    for (let i = 0; i < this.itemCount_; i++) {
-      const itemBlock = workspace.newBlock('text_concat_item');
-      itemBlock.initSvg();
-      connection.connect(itemBlock.previousConnection);
-      connection = itemBlock.nextConnection;
-    }
-    return containerBlock;
-  },
-
-  compose: function(containerBlock) {
-    let itemBlock = containerBlock.nextConnection.targetBlock();
-    const connections = [];
-    while (itemBlock) {
-      connections.push(itemBlock.valueConnection_);
-      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
-    }
-    for (let i = 0; i < this.itemCount_; i++) {
-      const connection = this.getInput('ADD' + i).connection.targetConnection;
-      if (connection && connections.indexOf(connection) === -1) {
-        connection.disconnect();
-      }
-    }
-    this.itemCount_ = connections.length;
-    this.updateShape_();
-    for (let i = 0; i < this.itemCount_; i++) {
-      Blockly.Mutator.reconnect(connections[i], this, 'ADD' + i);
-    }
-  },
-
-  saveConnections: function(containerBlock) {
-    let itemBlock = containerBlock.nextConnection.targetBlock();
-    let i = 0;
-    while (itemBlock) {
-      const input = this.getInput('ADD' + i);
-      itemBlock.valueConnection_ = input && input.connection.targetConnection;
-      i++;
-      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
-    }
-  },
-
-  updateShape_: function() {
-    if (this.itemCount_ && this.getInput('EMPTY')) {
-      this.removeInput('EMPTY');
-    } else if (!this.itemCount_ && !this.getInput('EMPTY')) {
-      this.appendDummyInput('EMPTY')
-          .appendField('create empty text');
-          if (this.getInput('WITH')) {
-            this.removeInput('WITH');
-          }
-    } else {
-        if (!this.getInput('WITH')) {
-            const input = this.appendDummyInput('WITH');
-            if (this.itemCount_ > 0) {
-              input.appendField('create text with');
-            }
-            if(this.getInput('EMPTY')) {
-              this.removeInput('EMPTY');
-            }
-        }
-    }
-
-    for (let i = 0; i < this.itemCount_; i++) {
-      if (!this.getInput('ADD' + i)) {
-        const input = this.appendValueInput('ADD' + i)
-                           .setAlign(Blockly.ALIGN_RIGHT);
-      }
-    }
-    for (let i = this.itemCount_; this.getInput('ADD' + i); i++) {
-      this.removeInput('ADD' + i);
-    }
-  }
-};
-
-Blockly.Extensions.registerMutator(
-  'text_concat_mutator',
-  textConcatMutator,
-  function() {
-    this.itemCount_ = 2;
-    this.updateShape_();
-  },
-  ['text_concat_item']
-);
-
-const textFormatMutator = {
-  itemCount_: 0,
-
-  saveExtraState: function() {
-    return {
-      'itemCount': this.itemCount_
-    };
-  },
-
-  loadExtraState: function(state) {
-    this.itemCount_ = state['itemCount'] || 0;
-    this.updateShape_();
-  },
-
-  decompose: function(workspace) {
-    const containerBlock = workspace.newBlock('text_format_item');
-    containerBlock.initSvg();
-    let connection = containerBlock.nextConnection;
-    for (let i = 0; i < this.itemCount_; i++) {
-      const itemBlock = workspace.newBlock('text_format_item');
-      itemBlock.initSvg();
-      connection.connect(itemBlock.previousConnection);
-      connection = itemBlock.nextConnection;
-    }
-    return containerBlock;
-  },
-
-  compose: function(containerBlock) {
-    let itemBlock = containerBlock.nextConnection.targetBlock();
-    const connections = [];
-    while (itemBlock) {
-      connections.push(itemBlock.valueConnection_);
-      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
-    }
-    for (let i = 0; i < this.itemCount_; i++) {
-      const connection = this.getInput('ARG' + i).connection.targetConnection;
-      if (connection && connections.indexOf(connection) === -1) {
-        connection.disconnect();
-      }
-    }
-    this.itemCount_ = connections.length;
-    this.updateShape_();
-    for (let i = 0; i < this.itemCount_; i++) {
-      Blockly.Mutator.reconnect(connections[i], this, 'ARG' + i);
-    }
-  },
-
-  saveConnections: function(containerBlock) {
-    let itemBlock = containerBlock.nextConnection.targetBlock();
-    let i = 0;
-    while (itemBlock) {
-      const input = this.getInput('ARG' + i);
-      itemBlock.valueConnection_ = input && input.connection.targetConnection;
-      i++;
-      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
-    }
-  },
-
-  updateShape_: function() {
-    for (let i = 0; i < this.itemCount_; i++) {
-      if (!this.getInput('ARG' + i)) {
-        const input = this.appendValueInput('ARG' + i)
-                           .setAlign(Blockly.ALIGN_RIGHT);
-      }
-    }
-    for (let i = this.itemCount_; this.getInput('ARG' + i); i++) {
-      this.removeInput('ARG' + i);
-    }
-  }
-};
-
-Blockly.Extensions.registerMutator(
-  'text_format_mutator',
-  textFormatMutator,
-  null,
-  ['text_format_item']
-);
